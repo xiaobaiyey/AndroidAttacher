@@ -145,7 +145,7 @@ class AdbWrapper(object):
             if not devicePackage:
                 continue
             # devicePackage has the format 'package:/data/app/pkg.apk=pkg'
-            devicePackage = devicePackage.partition('=')
+            devicePackage = devicePackage.partition(".apk=")
             ret[devicePackage[2]] = devicePackage[0].partition(':')[2]
         return ret
 

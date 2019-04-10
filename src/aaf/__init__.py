@@ -151,7 +151,14 @@ class AndroidAttacher(object):
         aaf_utils = "/data/local/tmp/aaf_utils.jar"
         # print "Pushing utils.jar to device: %s" % aaf_utils
         self.adb.push(self.utilsJar, aaf_utils)
-        out = self.adb.call(['shell', 'su', '-c',
+        sdk_str = self.adb.call(["shell", "getprop", "ro.build.version.sdk"])
+        sdkversion = int(sdk_str)
+        out="";
+        if sdkversion>=23:
+            out = self.adb.call(['shell', 'su', '-c',
+                                 '"CLASSPATH=' + aaf_utils + ' exec app_process /system/bin com.fuzhu8.aaf.GetMainActivity ' + packageName + '"'])
+        else:
+            out = self.adb.call(['shell', 'su', '-c',
                              '"dalvikvm -cp ' + aaf_utils + ' com.android.internal.util.WithFramework com.fuzhu8.aaf.GetMainActivity ' + packageName + '"'])
         resp = json.loads(out)
         if resp["code"] != 0:
@@ -182,7 +189,8 @@ class AndroidAttacher(object):
 
         localServerPath = os.path.join(self.bindir, 'android_server')
         androidServerPath = '/data/local/tmp/android_server'
-        remote = self.adb.call(["shell", "md5", androidServerPath]).split()[0]
+        remote = self.adb.call(
+            ["shell", "md5sum", androidServerPath]).split()[0]
         md5 = hashlib.md5()
         with open(localServerPath, "r") as f:
             while True:
